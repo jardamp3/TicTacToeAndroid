@@ -1,18 +1,24 @@
 package fi.jamk.tictactoe;
 
 import android.app.Activity;
-import android.graphics.Color;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.util.Log;
+import android.os.IBinder;
 import android.view.View;
-import android.widget.Button;
+import android.widget.ArrayAdapter;
+import android.widget.TextView;
 
-public class MainActivity extends Activity
+import java.util.ArrayList;
+
+public class MainActivity extends BaseServiceActivity
 {
-
-    private int[][] gameField;
-    private boolean playerCross;
-    private boolean playerRing;
+    TextView txtPairedWith;
 
 
     @Override
@@ -21,75 +27,42 @@ public class MainActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // player with cross starts
-        playerCross = true;
-        playerRing = false;
 
-        // inicialize game field
-        // null = empty place
-        // 1 = cross
-        // 2 = ring
-        gameField = new int[7][7];
+        txtPairedWith = findViewById(R.id.txtPairedWith);
     }
 
-    public void onFieldClick(View v){
 
-        int winner = 0;
-        int idOfButton = v.getId();
-        Button clickedBtn = (Button)findViewById(idOfButton);
-        int tagOfButton = Integer.parseInt(clickedBtn.getTag().toString());
+    // MAIN MENU BUTTONS CLICK
+    public void onConnectClick(View v){
+        if(!btService.isBtEnabled()) // start bluetooth
+            return;
 
+        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,
+                btService.getListDevices());
 
-        Log.d("Clicked tag:", Integer.toString(tagOfButton));
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("Select device:")
+                .setAdapter(adapter, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String name = adapter.getItem(which);
+                        btService.setRemoteDevice(name);
+                        txtPairedWith.setText("Paired with: " + name);
+                    }
+                })
+                .create();
 
-
-        // choose if cross or ring will be shown
-        if(playerCross){
-            clickedBtn.setTextColor(Color.parseColor("#FF0000"));
-            clickedBtn.setText("X");
-
-            playerCross = false;
-            playerRing = true;
-
-            gameField[tagOfButton/7][tagOfButton%7] = 1;
-
-        }
-        else if (playerRing){
-            clickedBtn.setText("O");
-            clickedBtn.setTextColor(Color.parseColor("#0000FF"));
-
-            playerCross = true;
-            playerRing = false;
-
-            gameField[tagOfButton/7][tagOfButton%7] = 2;
-        }
-
-        winner = checkEnd(tagOfButton/7,tagOfButton%7);
-        if (winner!=0)
-        {
-            //open dialog
-        }
+        builder.show();
     }
 
-    public int checkEnd(int x, int y)
-    {
-        int counter = 1;
-        if (gameField[x][y] == gameField[x][y + 1])
-        {
-            counter++;
-            if (counter >= 5)
-            {
-                return gameField[x][y];
-            }
-            if (gameField[x][y] == gameField[x][y + 2])
-            {
-                counter++;
-                if (counter >= 5)
-                {
-                    return gameField[x][y];
-                }
-            }
-        }
-        return 0;
+    public void onStartGameClick(View v){
+        Intent i = new Intent(this, GameActivity.class);
+        startActivity(i);
     }
+
+    public void onHighScoresClick(View v){
+
+    }
+
+
 }
