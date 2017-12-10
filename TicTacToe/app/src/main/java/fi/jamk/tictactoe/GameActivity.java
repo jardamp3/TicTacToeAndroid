@@ -1,6 +1,5 @@
 package fi.jamk.tictactoe;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -204,6 +203,9 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
         winner = check_diagonal_b2t(x,y);
         if(winner !=0)
             return winner;
+        winner = check_tie();
+        if(winner !=0)
+            return  winner;
 
         return winner;
     }
@@ -506,5 +508,14 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
             }
         }
         return 0;
+    }
+    private int check_tie()
+    {
+        //check for an emty field as long as there is one the game is continuing if not its a tie
+        for(int i=0;i<6;i++)
+            for(int j=0;j<6;j++)
+                if(gameField[i][j]==0)
+                    return 0;
+        return 3;
     }
 }

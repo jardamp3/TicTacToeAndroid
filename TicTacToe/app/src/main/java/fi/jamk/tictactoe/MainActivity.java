@@ -1,24 +1,18 @@
 package fi.jamk.tictactoe;
 
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-
 public class MainActivity extends BaseServiceActivity
 {
     TextView txtPairedWith;
+    SQLiteDatabase db;
 
 
     @Override
@@ -29,6 +23,8 @@ public class MainActivity extends BaseServiceActivity
 
 
         txtPairedWith = findViewById(R.id.txtPairedWith);
+
+        db = (new DatabaseOpenHelper(this)).getWritableDatabase();
     }
 
 
@@ -61,7 +57,8 @@ public class MainActivity extends BaseServiceActivity
     }
 
     public void onHighScoresClick(View v){
-
+        Intent i = new Intent(this, Scores.class);
+        startActivity(i);
     }
 
 
