@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,7 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
     private ProgressDialog progressDialog;
     private boolean isCross;
     private String opponentName;
+    private TextView turn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -44,6 +46,9 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
         gameField = new int[7][7];
         btnList = new ArrayList<>();
 
+        turn = (TextView) findViewById(R.id.txtturn);
+
+
 
         // save all buttons in game field into list
         for (int i = 0; i <= 48; i++) {
@@ -61,6 +66,8 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
                         btService.openConnection();
                         btService.setCallbacks(GameActivity.this);
                         isCross = true;
+                        turn.setText("your turn");
+                        turn.setTextColor(Color.parseColor("#00cc00"));
                     }
                 })
                 .setNegativeButton("Ring", new DialogInterface.OnClickListener() {
@@ -69,6 +76,8 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
                         btService.openConnection();
                         btService.setCallbacks(GameActivity.this);
                         isCross = false;
+                        turn.setText("opponents turn");
+                        turn.setTextColor(Color.parseColor("#cc0000"));
                     }
                 })
                 .create();
@@ -121,6 +130,8 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
 
             gameField[tagOfButton/7][tagOfButton%7] = 1;
 
+
+
         }
         else if (playerRingTurn){
             btn.setText("O");
@@ -143,11 +154,11 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
                 db.execSQL("UPDATE Scores SET ties = ties +1 WHERE name='" + opponentName + "';");
             }
             else if((winner == 1 && isCross) || (winner == 2 && !isCross)){
-                text = "Game over. You lose :-(";
+                text = "Congratulations. You win ! :-)";
                 db.execSQL("UPDATE Scores SET wins = wins +1 WHERE name='" + opponentName + "';");
             }
             else {
-                text = "Congratulations. You win ! :-)";
+                text = "Game over. You lose :-(";
                 db.execSQL("UPDATE Scores SET looses = looses +1 WHERE name='" + opponentName + "';");
             }
 
@@ -177,9 +188,13 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
         if((!playerCrossTurn && isCross) || (!playerRingTurn && !isCross)){
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                     WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                    turn.setText("opponents turn");
+                    turn.setTextColor(Color.parseColor("#cc0000"));
         }
         else{
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            turn.setText("your turn");
+            turn.setTextColor(Color.parseColor("#00cc00"));
         }
     }
 
