@@ -10,12 +10,9 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static android.R.attr.text;
 
 public class GameActivity extends BaseServiceActivity implements IServiceCallbacks
 {
@@ -141,13 +138,17 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
         if (winner!=0)
         {
             String text;
-            if((winner == 1 && isCross) || (winner == 2 && !isCross)){
-                text = "Congratulations. You win ! :-)";
-                db.execSQL("UPDATE Scores SET looses = looses +1 WHERE name='" + opponentName + "';");
+            if(winner == 3) {
+                text = "you almost won, but it's a tie";
+                db.execSQL("UPDATE Scores SET ties = ties +1 WHERE name='" + opponentName + "';");
             }
-            else {
+            else if((winner == 1 && isCross) || (winner == 2 && !isCross)){
                 text = "Game over. You lose :-(";
                 db.execSQL("UPDATE Scores SET wins = wins +1 WHERE name='" + opponentName + "';");
+            }
+            else {
+                text = "Congratulations. You win ! :-)";
+                db.execSQL("UPDATE Scores SET looses = looses +1 WHERE name='" + opponentName + "';");
             }
 
             // server-client choose dialog
@@ -548,8 +549,8 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
     private int check_tie()
     {
         //check for an emty field as long as there is one the game is continuing if not its a tie
-        for(int i=0;i<6;i++)
-            for(int j=0;j<6;j++)
+        for(int i=0;i<7;i++)
+            for(int j=0;j<7;j++)
                 if(gameField[i][j]==0)
                     return 0;
         return 3;

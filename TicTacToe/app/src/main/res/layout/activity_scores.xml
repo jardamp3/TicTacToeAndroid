@@ -64,16 +64,6 @@
             android:textAlignment="center"
             android:textColor="@android:color/black"/>
 
-        <TextView
-            android:id="@+id/winning_rateLbl"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_weight="1"
-            android:text="@string/lblWinningRate"
-            android:textAlignment="center"
-            android:textColor="@android:color/black"/>
-
     </LinearLayout>
 
     <ListView
