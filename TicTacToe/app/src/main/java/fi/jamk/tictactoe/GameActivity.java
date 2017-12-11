@@ -3,6 +3,7 @@ package fi.jamk.tictactoe;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,15 +15,17 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.R.attr.text;
+
 public class GameActivity extends BaseServiceActivity implements IServiceCallbacks
 {
-
     private int[][] gameField;
     private boolean playerCrossTurn;
     private boolean playerRingTurn;
     private List<Button> btnList;
     private ProgressDialog progressDialog;
     private boolean isCross;
+    private String opponentName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -30,6 +33,8 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
 
+        Intent intent = getIntent();
+        opponentName = intent.getExtras().getString("opponentName");
 
         // player with cross starts
         playerCrossTurn = true;
@@ -73,8 +78,13 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
 
         builder.show();
 
+    }
 
-
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        btService.closeConnection();
+        Log.d("Game activity:", "ending");
     }
 
     public void onFieldClick(View v){
@@ -130,7 +140,33 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
         winner = checkEnd(tagOfButton/7,tagOfButton%7);
         if (winner!=0)
         {
-            Toast.makeText(getApplicationContext(),winner+" wins",Toast.LENGTH_SHORT).show();
+            String text;
+            if((winner == 1 && isCross) || (winner == 2 && !isCross)){
+                text = "Congratulations. You win ! :-)";
+                db.execSQL("UPDATE Scores SET looses = looses +1 WHERE name='" + opponentName + "';");
+            }
+            else {
+                text = "Game over. You lose :-(";
+                db.execSQL("UPDATE Scores SET wins = wins +1 WHERE name='" + opponentName + "';");
+            }
+
+            // server-client choose dialog
+            AlertDialog.Builder builder = new AlertDialog.Builder(GameActivity.this);
+            builder.setMessage(text)
+                    .setPositiveButton("Back to menu", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            finish();
+                        }
+                    })
+                    .setNegativeButton("Play again", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            finish();
+                            startActivity(getIntent());
+                        }
+                    })
+                    .create();
+
+            builder.show();
         }
     }
 

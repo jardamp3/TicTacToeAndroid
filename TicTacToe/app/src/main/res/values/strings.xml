@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">TicTacToe Bluetooth</string>
+    <string name="lblName">Name</string>
+    <string name="lblWins">Wins</string>
+    <string name="lblLooses">Looses</string>
+    <string name="lblTies">Ties</string>
+    <string name="lblWinningRate">Win rate</string>
 </resources>

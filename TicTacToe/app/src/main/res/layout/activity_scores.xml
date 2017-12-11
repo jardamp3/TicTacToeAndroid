@@ -1,20 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:text="HighScores"
+        android:textAlignment="center"
+        android:textColor="@android:color/holo_blue_dark"
+        android:textSize="24sp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:background="@android:color/darker_gray"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/nameLbl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_weight="1"
+            android:maxWidth="100dp"
+            android:minWidth="100dp"
+            android:text="@string/lblName"
+            android:textAlignment="center"
+            android:textColor="@android:color/black"/>
+
+        <TextView
+            android:id="@+id/winsLbl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_weight="1"
+            android:text="@string/lblWins"
+            android:textAlignment="center"
+            android:textColor="@android:color/black"/>
+
+        <TextView
+            android:id="@+id/loosesLbl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_weight="1"
+            android:text="@string/lblLooses"
+            android:textAlignment="center"
+            android:textColor="@android:color/black"/>
+
+        <TextView
+            android:id="@+id/tiesLbl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_weight="1"
+            android:text="@string/lblTies"
+            android:textAlignment="center"
+            android:textColor="@android:color/black"/>
+
+        <TextView
+            android:id="@+id/winning_rateLbl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_weight="1"
+            android:text="@string/lblWinningRate"
+            android:textAlignment="center"
+            android:textColor="@android:color/black"/>
+
+    </LinearLayout>
 
     <ListView
         android:id="@+id/scores"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-
-    <Button
-        android:id="@+id/home"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:onClick="addItem"
-        android:text="Main Menu" />
+        android:layout_height="match_parent"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_weight="1"/>
 
 
 </LinearLayout>

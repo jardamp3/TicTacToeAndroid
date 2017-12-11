@@ -35,9 +35,12 @@ public class BluetoothService extends Service
     private static String NAME = "fi.jamk.tictactoe"; //id of app
     private static UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"); //SerialPortService ID // MY_UUID is the app's UUID string, also used by the client code.
 
+
+    private Thread serverThread;
+    private Thread clientThread;
+    private Thread writterThread;
     private BluetoothAdapter btAdapter;
     private BluetoothSocket socket;
-    private BluetoothServerSocket serverSocket;
     private InputStream is;
     private OutputStream os;
     private BluetoothDevice remoteDevice;
@@ -107,14 +110,25 @@ public class BluetoothService extends Service
 
         if(wantToBeServer)
         {
-            //Toast.makeText(getApplicationContext(), "This device is server" ,Toast.LENGTH_SHORT).show();
-            new Thread(serverListener).start();
+            serverThread = new Thread(serverListener);
+            serverThread.start();
         }
         else //CLIENT
         {
-            //Toast.makeText(getApplicationContext(), "This device is client" ,Toast.LENGTH_SHORT).show();
-            new Thread(clientConnecter).start();
+            clientThread = new Thread(clientConnecter);
+            clientThread.start();
         }
+    }
+
+    public void closeConnection(){
+        CONTINUE_READ_WRITE = false;
+
+        if(wantToBeServer)
+            serverThread.interrupt();
+        else //CLIENT
+            clientThread.interrupt();
+
+        writterThread.interrupt();
     }
 
     private Runnable writter = new Runnable() {
@@ -162,16 +176,18 @@ public class BluetoothService extends Service
 
             try //reading part
             {
+
                 is = socket.getInputStream();
                 os = socket.getOutputStream();
-                new Thread(writter).start();
-
+                writterThread = new Thread(writter);
+                writterThread.start();
 
                 int bytes;
                 byte[] buffer = new byte[1024];
 
                 while(CONTINUE_READ_WRITE) //Keep reading the messages while connection is open...
                 {
+                    Log.d("SERVER", "thread running");
                     bytes = is.read(buffer);
                     String readedString = new String(buffer, 0, bytes);
 
@@ -180,7 +196,6 @@ public class BluetoothService extends Service
                     if (serviceCallbacks != null) {
                         serviceCallbacks.recieveData(readedString);
                     }
-
                 }
             }
             catch(IOException e){
@@ -225,7 +240,9 @@ public class BluetoothService extends Service
 
                 os = socket.getOutputStream();
                 is = socket.getInputStream();
-                new Thread(writter).start();
+                writterThread = new Thread(writter);
+                writterThread.start();
+
                 Log.d(TAG, "Preparation for reading was done");
 
                 int bytes;

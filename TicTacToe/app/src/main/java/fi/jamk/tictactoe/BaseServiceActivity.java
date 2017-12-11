@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.IBinder;
 
@@ -18,11 +19,14 @@ public abstract class BaseServiceActivity extends Activity
 {
     BluetoothService btService;
     boolean isBound = false;
+    SQLiteDatabase db;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //setContentView(R.layout.activity_basic);
+
+        db = (new DatabaseOpenHelper(this)).getWritableDatabase();
 
         Intent i = new Intent(this, BluetoothService.class);
         bindService(i, btserviceConnection, Context.BIND_AUTO_CREATE);

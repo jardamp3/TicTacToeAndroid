@@ -3,16 +3,20 @@ package fi.jamk.tictactoe;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends BaseServiceActivity
 {
     TextView txtPairedWith;
-    SQLiteDatabase db;
+    Cursor cursor;
+    String pairedDeviceName;
 
 
     @Override
@@ -23,8 +27,6 @@ public class MainActivity extends BaseServiceActivity
 
 
         txtPairedWith = findViewById(R.id.txtPairedWith);
-
-        db = (new DatabaseOpenHelper(this)).getWritableDatabase();
     }
 
 
@@ -41,9 +43,9 @@ public class MainActivity extends BaseServiceActivity
                 .setAdapter(adapter, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String name = adapter.getItem(which);
-                        btService.setRemoteDevice(name);
-                        txtPairedWith.setText("Paired with: " + name);
+                        pairedDeviceName = adapter.getItem(which);
+                        btService.setRemoteDevice(pairedDeviceName);
+                        txtPairedWith.setText("Paired with: " + pairedDeviceName);
                     }
                 })
                 .create();
@@ -52,12 +54,26 @@ public class MainActivity extends BaseServiceActivity
     }
 
     public void onStartGameClick(View v){
+        //db.execSQL("delete from SCORES");
+
+        cursor = db.rawQuery("SELECT name FROM SCORES WHERE name = '" + pairedDeviceName + "';", null);
+
+        if(cursor.getCount() == 0){
+            String comm = "INSERT INTO SCORES (name, wins, looses, ties) VALUES('"+ pairedDeviceName+"', 0, 0, 0);";
+            db.execSQL(comm);
+            Log.d("DB:", "new device name inserted");
+        }
+
+
         Intent i = new Intent(this, GameActivity.class);
+        i.putExtra("opponentName", pairedDeviceName);
         startActivity(i);
+
+
     }
 
     public void onHighScoresClick(View v){
-        Intent i = new Intent(this, Scores.class);
+        Intent i = new Intent(this, ScoresActivity.class);
         startActivity(i);
     }
 

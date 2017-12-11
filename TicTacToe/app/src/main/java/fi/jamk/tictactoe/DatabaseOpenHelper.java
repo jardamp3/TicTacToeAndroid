@@ -2,6 +2,7 @@ package fi.jamk.tictactoe;
 
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -28,8 +29,6 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
         // create a new table
         //db.execSQL("DROP TABLE "+DATABASE_TABLE);
         db.execSQL("CREATE TABLE "+DATABASE_TABLE+" (_id INTEGER PRIMARY KEY AUTOINCREMENT, "+NAME+" TEXT, "+WINS+" REAL, "+LOOSES+" REAL,"+TIES+" REAL);");
-
-
     }
 
     @Override
