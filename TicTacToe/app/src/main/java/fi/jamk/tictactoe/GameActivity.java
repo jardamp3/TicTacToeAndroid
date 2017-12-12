@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,7 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
     private ProgressDialog progressDialog;
     private boolean isCross;
     private String opponentName;
+    private TextView turn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -31,6 +33,7 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
         setContentView(R.layout.activity_game);
 
         Intent intent = getIntent();
+        //opponents name for updating the database
         opponentName = intent.getExtras().getString("opponentName");
 
         // player with cross starts
@@ -43,6 +46,9 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
         // 2 = ring
         gameField = new int[7][7];
         btnList = new ArrayList<>();
+
+        turn = (TextView) findViewById(R.id.txtturn);
+
 
 
         // save all buttons in game field into list
@@ -61,6 +67,10 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
                         btService.openConnection();
                         btService.setCallbacks(GameActivity.this);
                         isCross = true;
+
+                        //txtView for whos turn it is
+                        turn.setText("your turn");
+                        turn.setTextColor(Color.parseColor("#00cc00"));
                     }
                 })
                 .setNegativeButton("Ring", new DialogInterface.OnClickListener() {
@@ -69,6 +79,10 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
                         btService.openConnection();
                         btService.setCallbacks(GameActivity.this);
                         isCross = false;
+
+                        //txtView for whos turn it is
+                        turn.setText("opponents turn");
+                        turn.setTextColor(Color.parseColor("#cc0000"));
                     }
                 })
                 .create();
@@ -86,7 +100,7 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
 
     public void onFieldClick(View v){
 
-
+        // find out which button got clicked
         int idOfButton = v.getId();
         Button clickedBtn = (Button)findViewById(idOfButton);
         String tagOfClickedButton = clickedBtn.getTag().toString();
@@ -121,6 +135,8 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
 
             gameField[tagOfButton/7][tagOfButton%7] = 1;
 
+
+
         }
         else if (playerRingTurn){
             btn.setText("O");
@@ -139,15 +155,18 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
         {
             String text;
             if(winner == 3) {
+                //winner = 3 means a tie
                 text = "you almost won, but it's a tie";
                 db.execSQL("UPDATE Scores SET ties = ties +1 WHERE name='" + opponentName + "';");
             }
             else if((winner == 1 && isCross) || (winner == 2 && !isCross)){
-                text = "Game over. You lose :-(";
+                //winning
+                text = "Congratulations. You win ! :-)";
                 db.execSQL("UPDATE Scores SET wins = wins +1 WHERE name='" + opponentName + "';");
             }
             else {
-                text = "Congratulations. You win ! :-)";
+                //loosing
+                text = "Game over. You lose :-(";
                 db.execSQL("UPDATE Scores SET looses = looses +1 WHERE name='" + opponentName + "';");
             }
 
@@ -177,9 +196,17 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
         if((!playerCrossTurn && isCross) || (!playerRingTurn && !isCross)){
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                     WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+
+                    //txtView for whos turn it is
+                    turn.setText("opponents turn");
+                    turn.setTextColor(Color.parseColor("#cc0000"));
         }
         else{
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+
+            //txtView for whos turn it is
+            turn.setText("your turn");
+            turn.setTextColor(Color.parseColor("#00cc00"));
         }
     }
 
@@ -225,9 +252,12 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
 
 
     // --- GAME LOGIC ---
+    //method for checking if the game is still going on or if its over
     private int checkEnd(int x, int y) {
         int winner;
 
+        // its calls the methods for checking different possibilities to win
+        //all methods have a counter if it reaches 5 we have a winner
         winner = check_horizontal(x,y);
         if(winner !=0)
             return winner;
@@ -240,6 +270,8 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
         winner = check_diagonal_b2t(x,y);
         if(winner !=0)
             return winner;
+        //if we have no winner there still could be a tie
+        //the game is a tie if there is no "free" button anymore
         winner = check_tie();
         if(winner !=0)
             return  winner;
@@ -252,7 +284,6 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
         int counter = 1;
 
         //check horizontal
-
         //check right side
         if (y != 6 && gameField[x][y] == gameField[x][y + 1])
         {

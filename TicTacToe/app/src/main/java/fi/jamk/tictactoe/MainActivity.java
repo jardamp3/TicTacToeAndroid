@@ -4,13 +4,11 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class MainActivity extends BaseServiceActivity
 {
@@ -37,7 +35,7 @@ public class MainActivity extends BaseServiceActivity
 
         final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,
                 btService.getListDevices());
-
+        //connect the devices via Bluetooth
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle("Select device:")
                 .setAdapter(adapter, new DialogInterface.OnClickListener() {
@@ -55,7 +53,7 @@ public class MainActivity extends BaseServiceActivity
 
     public void onStartGameClick(View v){
         //db.execSQL("delete from SCORES");
-
+        //first add the player to the database if it is not in there yet
         cursor = db.rawQuery("SELECT name FROM SCORES WHERE name = '" + pairedDeviceName + "';", null);
 
         if(cursor.getCount() == 0){
@@ -64,7 +62,7 @@ public class MainActivity extends BaseServiceActivity
             Log.d("DB:", "new device name inserted");
         }
 
-
+        //start the game activity
         Intent i = new Intent(this, GameActivity.class);
         i.putExtra("opponentName", pairedDeviceName);
         startActivity(i);
@@ -73,6 +71,7 @@ public class MainActivity extends BaseServiceActivity
     }
 
     public void onHighScoresClick(View v){
+        //start the Scores activity
         Intent i = new Intent(this, ScoresActivity.class);
         startActivity(i);
     }
