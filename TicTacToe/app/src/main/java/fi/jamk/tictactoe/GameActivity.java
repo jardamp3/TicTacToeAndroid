@@ -133,6 +133,7 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
             playerCrossTurn = false;
             playerRingTurn = true;
 
+            //put value to gameField
             gameField[tagOfButton/7][tagOfButton%7] = 1;
 
 
@@ -145,6 +146,7 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
             playerCrossTurn = true;
             playerRingTurn = false;
 
+            //put value in gameField
             gameField[tagOfButton/7][tagOfButton%7] = 2;
         }
 

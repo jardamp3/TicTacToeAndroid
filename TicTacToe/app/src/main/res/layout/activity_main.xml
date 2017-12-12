@@ -41,10 +41,10 @@
             android:layout_height="wrap_content"
             android:layout_margin="0dp"
             android:layout_weight="0.13"
-            android:backgroundTint="@color/green"
+            android:backgroundTint="@color/red"
             android:minHeight="60dp"
             android:onClick="onStartGameClick"
-            android:text="Start game"/>
+            android:text="Start game" />
 
         <Button
             android:id="@+id/btnHighScores"
