@@ -72,28 +72,7 @@ public class BluetoothService extends Service
             listDevices.add(0, bt.getName());
             Log.d("Paired device:", bt.getName());
         }
-
-        /*btAdapter.startDiscovery();
-
-        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        registerReceiver(mReceiver, filter);*/
     }
-
-    // TODO:
-    // for finding near devices
-    // Create a BroadcastReceiver for ACTION_FOUND.
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                // Get the BluetoothDevice object from the Intent
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                // Add the name and address to an array adapter to show in a ListView
-                //devicesAdapter.add(device.getName() + "\n" + device.getAddress());
-                Log.d("Found device:", device.getName());
-            }
-        }
-    };
 
     public void openConnection() //opens right thread for server or client
     {
@@ -176,7 +155,6 @@ public class BluetoothService extends Service
 
             try //reading part
             {
-
                 is = socket.getInputStream();
                 os = socket.getOutputStream();
                 writterThread = new Thread(writter);
@@ -187,7 +165,6 @@ public class BluetoothService extends Service
 
                 while(CONTINUE_READ_WRITE) //Keep reading the messages while connection is open...
                 {
-                    Log.d("SERVER", "thread running");
                     bytes = is.read(buffer);
                     String readedString = new String(buffer, 0, bytes);
 
@@ -298,7 +275,6 @@ public class BluetoothService extends Service
             Intent turnOn = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             getApplicationContext().startActivity(turnOn);
             return false;
-
         } else
         {
             getDevices();
