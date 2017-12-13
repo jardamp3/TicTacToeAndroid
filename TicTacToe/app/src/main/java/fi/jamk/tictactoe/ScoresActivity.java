@@ -23,12 +23,9 @@ public class ScoresActivity extends BaseServiceActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scores);
 
-
-
         //find List View
         scores = (ListView) findViewById(R.id.scores);
         registerForContextMenu(scores);
-
 
         queryData();
     }

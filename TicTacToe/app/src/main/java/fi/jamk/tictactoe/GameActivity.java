@@ -192,8 +192,7 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
         }
     }
 
-
-    // TODO: changing turn
+    // Changing the turn
     public void changeTurn(){
         if((!playerCrossTurn && isCross) || (!playerRingTurn && !isCross)){
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
@@ -213,8 +212,7 @@ public class GameActivity extends BaseServiceActivity implements IServiceCallbac
     }
 
     @Override
-    public void recieveData(String buttonTag)
-    {
+    public void recieveData(String buttonTag) {
         final String text = buttonTag;
 
         runOnUiThread(new Runnable() {

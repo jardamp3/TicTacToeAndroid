@@ -20,7 +20,6 @@ public class MainActivity extends BaseServiceActivity
     String pairedDeviceName;
     Button btnStartGame;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {

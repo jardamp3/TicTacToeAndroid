@@ -38,6 +38,8 @@ public abstract class BaseServiceActivity extends Activity
         super.onDestroy();
     }
 
+
+    // Bounding the service
     private ServiceConnection btserviceConnection = new ServiceConnection()
     {
         @Override

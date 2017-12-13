@@ -5,8 +5,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
@@ -35,7 +33,6 @@ public class BluetoothService extends Service
     private static String NAME = "fi.jamk.tictactoe"; //id of app
     private static UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"); //SerialPortService ID // MY_UUID is the app's UUID string, also used by the client code.
 
-
     private Thread serverThread;
     private Thread clientThread;
     private Thread writterThread;
@@ -48,12 +45,10 @@ public class BluetoothService extends Service
     private ArrayList<String> listDevices;
     private boolean wantToBeServer;
 
-
     @Override
-    public void onCreate()
-    {
+    public void onCreate() {
         super.onCreate();
-
+        // initialize adapter
         btAdapter = BluetoothAdapter.getDefaultAdapter();
     }
 
@@ -63,42 +58,40 @@ public class BluetoothService extends Service
         return btBinder;
     }
 
+    // Get paired devices
     public void getDevices(){
         pairedDevices = btAdapter.getBondedDevices(); //list of devices
         listDevices = new ArrayList<String>();
 
-        for(BluetoothDevice bt : pairedDevices)
-        {
+        for(BluetoothDevice bt : pairedDevices) {
             listDevices.add(0, bt.getName());
             Log.d("Paired device:", bt.getName());
         }
     }
 
-    public void openConnection() //opens right thread for server or client
-    {
+    // Opens right thread for server or client
+    public void openConnection() {
         CONTINUE_READ_WRITE = true; //writer tiebreaker
         socket = null; //resetting if was used previously
         is = null; //resetting if was used previously
         os = null; //resetting if was used previously
 
-        if(pairedDevices.isEmpty() || remoteDevice == null)
-        {
+        if(pairedDevices.isEmpty() || remoteDevice == null) {
             Toast.makeText(this, "Paired device is not selected, choose one", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if(wantToBeServer)
-        {
+        if(wantToBeServer) {
             serverThread = new Thread(serverListener);
             serverThread.start();
         }
-        else //CLIENT
-        {
+        else {
             clientThread = new Thread(clientConnecter);
             clientThread.start();
         }
     }
 
+    // Closes the connection (kills server and client threads), remote device still kept
     public void closeConnection(){
         CONTINUE_READ_WRITE = false;
 
@@ -110,17 +103,16 @@ public class BluetoothService extends Service
         writterThread.interrupt();
     }
 
+    // Thread for flushing otput stream
     private Runnable writter = new Runnable() {
         @Override
         public void run() {
-            while (CONTINUE_READ_WRITE) //reads from open stream
-            {
-                try
-                {
+            //reads from open stream
+            while (CONTINUE_READ_WRITE){
+                try {
                     os.flush();
                     Thread.sleep(2000);
-                } catch (Exception e)
-                {
+                } catch (Exception e) {
                     Log.e(TAG, "Writer failed in flushing output stream...");
                     CONTINUE_READ_WRITE = false;
                 }
@@ -128,23 +120,19 @@ public class BluetoothService extends Service
         }
     };
 
-
     // SERVER THREAD
     private Runnable serverListener = new Runnable()
     {
         public void run()
         {
             serviceCallbacks.waitForOpponent();
-            try
-            {
+            try {
                 Log.d("SERVER:", "Trying to run");
                 BluetoothServerSocket tmpsocket = btAdapter.listenUsingRfcommWithServiceRecord(NAME, MY_UUID);
                 socket = tmpsocket.accept();
                 CONNECTION_ENSTABLISHED = true; //protect from failing
                 Log.d("TrackingFlow", "Listening...");
-            }
-            catch (Exception ie)
-            {
+            } catch (Exception ie) {
                 Log.e(TAG, "Socket's accept method failed", ie);
                 ie.printStackTrace();
             }
@@ -152,9 +140,8 @@ public class BluetoothService extends Service
             Log.d(TAG, "Server is ready for listening...");
             serviceCallbacks.opponentReady();
 
-
-            try //reading part
-            {
+            //reading part
+            try {
                 is = socket.getInputStream();
                 os = socket.getOutputStream();
                 writterThread = new Thread(writter);
@@ -163,8 +150,8 @@ public class BluetoothService extends Service
                 int bytes;
                 byte[] buffer = new byte[1024];
 
-                while(CONTINUE_READ_WRITE) //Keep reading the messages while connection is open...
-                {
+                //Keep reading the messages while connection is open...
+                while(CONTINUE_READ_WRITE)  {
                     bytes = is.read(buffer);
                     String readedString = new String(buffer, 0, bytes);
 
@@ -183,11 +170,9 @@ public class BluetoothService extends Service
     };
 
     // CLIENT THREAD
-    private Runnable clientConnecter = new Runnable()
-    {
+    private Runnable clientConnecter = new Runnable() {
         @Override
-        public void run()
-        {
+        public void run() {
             // loading dialog for waiting
             serviceCallbacks.waitForOpponent();
 
@@ -209,8 +194,7 @@ public class BluetoothService extends Service
                 }
             }
 
-            try
-            {
+            try {
                 CONNECTION_ENSTABLISHED = true; //protect from failing
                 Log.d(TAG, "Client is connected...");
 
@@ -228,8 +212,8 @@ public class BluetoothService extends Service
                 // dissmis loading dialog
                 serviceCallbacks.opponentReady();
 
-                while(CONTINUE_READ_WRITE) //Keep reading the messages while connection is open...
-                {
+                //Keep reading the messages while connection is open...
+                while(CONTINUE_READ_WRITE) {
                     bytes = is.read(buffer);
                     String readedString = new String(buffer, 0, bytes);
 
@@ -239,44 +223,35 @@ public class BluetoothService extends Service
                         serviceCallbacks.recieveData(readedString.toString());
                     }
                 }
-            }
-            catch (IOException e)
-            {
+            } catch (IOException e) {
                 Log.e("CLIENT:", "Error with streams", e);
                 e.printStackTrace();
             }
         }
     };
 
-    public void sendString(String text) //sends text from text button
-    {
-        if(CONNECTION_ENSTABLISHED == false)
-        {
+    // Method for sending a string to other device - writes to output stream
+    public void sendString(String text) {
+        if(CONNECTION_ENSTABLISHED == false) {
             Toast.makeText(getApplicationContext(), "Connection between devices is not ready.", Toast.LENGTH_SHORT).show(); //usually problem server-client decision
         }
-        else
-        {
+        else {
             byte[] b = text.getBytes();
-            try
-            {
+            try {
                 os.write(b);
-            } catch (IOException e)
-            {
+            } catch (IOException e) {
                 Toast.makeText(getApplicationContext(), "Not sent", Toast.LENGTH_SHORT).show(); //usually problem server-client decision
             }
         }
     }
 
-
-    public boolean isBtEnabled() //turning on BT when is off
-    {
-        if (!btAdapter.isEnabled())
-        {
+    // Turning on BT when is off
+    public boolean isBtEnabled() {
+        if (!btAdapter.isEnabled()) {
             Intent turnOn = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             getApplicationContext().startActivity(turnOn);
             return false;
-        } else
-        {
+        } else {
             getDevices();
             return true;
         }
@@ -290,6 +265,7 @@ public class BluetoothService extends Service
         }
     }
 
+    // Setting callbacks - for call methods from activities implementing IServiceCallbacks interface
     public void setCallbacks(IServiceCallbacks callbacks) {
         serviceCallbacks = callbacks;
     }
@@ -298,6 +274,7 @@ public class BluetoothService extends Service
         return this.listDevices;
     }
 
+    // Setting remote device by name
     public void setRemoteDevice(String name){
         for(BluetoothDevice bt : pairedDevices) {
             if(name.equals(bt.getName())) {
@@ -307,6 +284,7 @@ public class BluetoothService extends Service
         Log.d("Selected device:", remoteDevice.getName());
     }
 
+    // Setting if device will be server or client
     public void setWantToBeServer(boolean choice){
         this.wantToBeServer = choice;
         Log.d("Want to be server:", Boolean.toString(wantToBeServer));
